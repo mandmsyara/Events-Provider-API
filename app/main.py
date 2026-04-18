@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 
+from app.middlewares.redirect import enforce_slash_middleware
 from app.api.routers.health import router as health_router
 
 
@@ -13,6 +14,8 @@ async def lifespan(app: FastAPI):
     print("app stopped")
 
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(lifespan=lifespan, redirect_slashes=False)
+
+app.middleware("http")(enforce_slash_middleware)
 
 app.include_router(health_router)
