@@ -8,7 +8,7 @@ async def enforce_slash_middleware(request: Request, call_next):
     if (
         path != "/"
         and not path.endswith("/")
-        and not path.startswith("/docs", "/openapi")
+        and not path.startswith(("/docs", "/openapi"))
     ):
         query_params = f"?{request.url.query}" if request.url.query else ""
         return RedirectResponse(url=f"{path}/{query_params}", status_code=301)
