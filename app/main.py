@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 
+from app.api.routers.health import router as health_router
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -12,3 +14,5 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+
+app.include_router(health_router)
