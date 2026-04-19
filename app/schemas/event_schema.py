@@ -27,3 +27,9 @@ class EventRead(EventBase):
     place: PlaceRead
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class EventLisrResponse(BaseModel):
+    next: str | None
+    previous: str | None
+    result: list[EventRead]
