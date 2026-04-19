@@ -1,1 +1,6 @@
-DATABASE_URL = "12"
+import os
+
+
+DATABASE_URL = os.getenv(
+    "DATABASE_URL", "postgresql+asyncpg://postgres:postgres@localhost:5432/events_db"
+)
