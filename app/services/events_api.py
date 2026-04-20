@@ -9,7 +9,7 @@ class EventsProviderClient:
     def __init__(self):
         self.base_url = EXTERNAL_API_URL
         self.headers = {"x-api-key": EXTERNAL_API_KEY}
-        self.client = httpx.AsyncClient(headers={"x-api-key": self.api_key})
+        self.client = httpx.AsyncClient(headers=self.headers)
 
     async def fetch_page(self, url: str | None = None) -> ExternalEventResponse:
         target_url = url or f"{self.base_url}/api/events/"
