@@ -9,7 +9,7 @@ from app.schemas.place_schema import PlaceRead
 class EventBase(BaseModel):
     name: str
     event_time: datetime
-    registrtion_deadline: datetime
+    registration_deadline: datetime
     status: str = "published"
     number_of_visitors: int = 0
 
