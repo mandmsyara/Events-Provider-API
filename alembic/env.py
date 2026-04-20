@@ -9,6 +9,7 @@ from alembic import context
 from app.database.base import Base
 from app.models.event import Event
 from app.models.place import Place
+from app.models.ticket import Ticket
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

@@ -9,6 +9,9 @@ from app.repositories.events import EventRepository
 from app.services.sync_service import EventSyncService
 from app.schemas.event_schema import EventRead, EventListResponse
 from app.services.events_api import SeatsService
+from app.schemas.tickets import TicketCreate
+from app.repositories.tickets import TicketRepository
+from app.services.ticket_service import TicketService
 
 router = APIRouter(prefix="/api", tags=["Events"])
 
@@ -79,3 +82,16 @@ async def get_event_seats(
     service = SeatsService(client, repo)
 
     return await service.get_available_seats(event_id)
+
+
+@router.post("/events/{event_id}/register")
+async def create_ticket(
+    payload: TicketCreate, session: AsyncSession = Depends(get_async_session)
+):
+    event_repo = EventRepository(session)
+    ticket_repo = TicketRepository(session)
+    client = EventsProviderClient()
+
+    service = TicketService(client, event_repo, ticket_repo)
+
+    return await service.create_ticket(payload)

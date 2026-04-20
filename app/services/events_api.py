@@ -34,6 +34,30 @@ class EventsProviderClient:
 
         return data.get("seats", [])
 
+    async def register(
+        self, event_id: str, first_name: str, last_name: str, email: str, seat: str
+    ) -> str:
+        url = f"{self.base_url}/api/events/{event_id}/register"
+
+        payload = {
+            "first_name": first_name,
+            "last_name": last_name,
+            "email": email,
+            "seat": seat,
+        }
+
+        response = await self.client.post(url, json=payload)
+
+        if response.status_code == 400:
+            raise Exception("Seat already taken")
+
+        if response.status_code == 404:
+            raise Exception("Event not found")
+
+        response.raise_for_status()
+
+        return response.json()["ticket_id"]
+
 
 class SeatsService:
     def __init__(self, client: EventsProviderClient, repo: EventRepository):
