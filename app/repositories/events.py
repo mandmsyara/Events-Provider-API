@@ -15,7 +15,10 @@ class EventRepository:
     async def upsert_place(self, place_data: dict):
         stmt = insert(Place).values(**place_data)
 
-        stmt = stmt.on_conflict_do_update(index_elements=["id"], set_=place_data)
+        stmt = stmt.on_conflict_do_update(
+            index_elements=["id"],
+            set_={k: v for k, v in place_data.items() if k != "id"},
+        )
 
         await self.session.execute(stmt)
 

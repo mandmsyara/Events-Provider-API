@@ -21,10 +21,11 @@ class EventSyncService:
                 for place in places.values():
                     await self.repo.upsert_place(place.model_dump())
 
+                await self.repo.session.flush()
+
                 for event_schema in page.results:
                     event_dict = event_schema.model_dump(exclude={"place"})
                     event_dict["place_id"] = event_schema.place.id
-
                     await self.repo.upsert_event(event_dict)
 
                 await self.repo.session.commit()
