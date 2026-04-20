@@ -34,3 +34,9 @@ class EventListResponse(BaseModel):
     next: str | None
     previous: str | None
     results: list[EventRead]
+
+
+class ExternalEventResponse(BaseModel):
+    next: str | None
+    previous: str | None
+    results: list[EventRead]
