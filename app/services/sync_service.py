@@ -3,38 +3,50 @@ from app.services.events_api import EventsProviderClient
 
 
 class EventSyncService:
+    _is_running = False
+
     def __init__(self, client: EventsProviderClient, repo: EventRepository):
         self.client = client
         self.repo = repo
 
-    async def sync_all(self):
-        page = await self.client.fetch_page()
+    async def sync_all(self) -> bool:
+        if EventSyncService._is_running:
+            return False
 
-        while True:
+        EventSyncService._is_running = True
+        try:
+            page = await self.client.fetch_page()
 
-            try:
-                places = {}
+            while True:
 
-                for event_schema in page.results:
-                    places[event_schema.place.id] = event_schema.place
+                try:
+                    places = {}
 
-                for place in places.values():
-                    await self.repo.upsert_place(place.model_dump())
+                    for event_schema in page.results:
+                        places[event_schema.place.id] = event_schema.place
 
-                await self.repo.session.flush()
+                    for place in places.values():
+                        await self.repo.upsert_place(place.model_dump())
 
-                for event_schema in page.results:
-                    event_dict = event_schema.model_dump(exclude={"place"})
-                    event_dict["place_id"] = event_schema.place.id
-                    await self.repo.upsert_event(event_dict)
+                    await self.repo.session.flush()
 
-                await self.repo.session.commit()
+                    for event_schema in page.results:
+                        event_dict = event_schema.model_dump(exclude={"place"})
+                        event_dict["place_id"] = event_schema.place.id
+                        await self.repo.upsert_event(event_dict)
 
-            except Exception:
-                await self.repo.session.rollback()
-                raise
+                    await self.repo.session.commit()
 
-            if not page.next:
-                break
+                except Exception:
+                    await self.repo.session.rollback()
+                    raise
 
-            page = await self.client.fetch_page(url=page.next)
+                if not page.next:
+                    break
+
+                page = await self.client.fetch_page(url=page.next)
+
+            return True
+
+        finally:
+            EventSyncService._is_running = False

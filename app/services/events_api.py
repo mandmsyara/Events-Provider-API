@@ -13,13 +13,11 @@ class EventsProviderClient:
 
     async def fetch_page(self, url: str | None = None) -> ExternalEventResponse:
         target_url = url or f"{self.base_url}/api/events/"
-
-        async with httpx.AsyncClient() as client:
-            response = await client.get(
-                target_url, headers=self.headers, timeout=20.0, follow_redirects=True
-            )
-            response.raise_for_status()
-            return ExternalEventResponse(**response.json())
+        response = await self.client.get(
+            target_url, timeout=20.0, follow_redirects=True
+        )
+        response.raise_for_status()
+        return ExternalEventResponse(**response.json())
 
     async def get_seats(self, event_id: str) -> list[str]:
         url = f"{self.base_url}/api/events/{event_id}/seats/"

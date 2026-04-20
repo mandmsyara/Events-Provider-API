@@ -18,9 +18,10 @@ async def sync_events(session: AsyncSession = Depends(get_async_session)):
     client = EventsProviderClient()
     repo = EventRepository(session)
     service = EventSyncService(client, repo)
+    started = await service.sync_all()
 
-    await service.sync_all()
-
+    if not started:
+        return {"status": "already started"}
     return {"status": "ok"}
 
 
