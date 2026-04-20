@@ -11,7 +11,7 @@ from app.schemas.event_schema import EventRead
 from app.core.config import EXTERNAL_API_URL
 
 
-router = APIRouter(prefix="/events", tags=["Events"])
+router = APIRouter(prefix="api/events", tags=["Events"])
 
 
 @router.post("/sync/")
