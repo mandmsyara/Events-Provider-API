@@ -22,7 +22,10 @@ class EventRepository:
     async def upsert_event(self, event_data: dict):
         stmt = insert(Event).values(**event_data)
 
-        stmt = stmt.on_conflict_do_update(index_elements=["id"], set_=event_data)
+        stmt = stmt.on_conflict_do_update(
+            index_elements=["id"],
+            set_={k: v for k, v in event_data.items() if k != "id"},
+        )
 
         await self.session.execute(stmt)
 
@@ -31,7 +34,7 @@ class EventRepository:
     ):
         stmt = select(Event).options(joinedload(Event.place))
         if date_from:
-            stmt = stmt.where(func.date(Event.event_time) >= date_from)
+            stmt = stmt.where(Event.event_time >= date_from)
 
         stmt = stmt.limit(page_size).offset((page - 1) * page_size)
         result = await self.session.execute(stmt)
@@ -41,7 +44,7 @@ class EventRepository:
         stmt = select(func.count()).select_from(Event)
 
         if date_from:
-            stmt = stmt.where(func.date(Event.event_time) >= date_from)
+            stmt = stmt.where(Event.event_time >= date_from)
 
         results = await self.session.execute(stmt)
         return results.scalar_one()

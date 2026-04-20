@@ -7,7 +7,7 @@ from app.database.session import get_async_session
 from app.services.events_api import EventsProviderClient
 from app.repositories.events import EventRepository
 from app.services.sync_service import EventSyncService
-from app.schemas.event_schema import EventRead
+from app.schemas.event_schema import EventRead, EventListResponse
 
 
 router = APIRouter(prefix="/api", tags=["Events"])
@@ -24,14 +24,14 @@ async def sync_events(session: AsyncSession = Depends(get_async_session)):
     return {"status": "ok"}
 
 
-@router.get("/events/", response_model=list[EventRead])
+@router.get("/events/", response_model=EventListResponse)
 async def get_events(
     page: int = 1,
     page_size: int = 20,
     date_from: date | None = None,
     session: AsyncSession = Depends(get_async_session),
 ):
-    repo = EventRepository
+    repo = EventRepository(session)
 
     count = await repo.count_events(date_from=date_from)
     events = await repo.get_all_events(
