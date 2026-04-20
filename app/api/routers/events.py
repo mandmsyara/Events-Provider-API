@@ -8,13 +8,11 @@ from app.repositories.events import EventRepository
 from app.services.sync_service import EventSyncService
 from app.schemas.event_schema import EventRead
 
-from app.core.config import EXTERNAL_API_URL
-
 
 router = APIRouter(prefix="/api/events", tags=["Events"])
 
 
-@router.post("/sync/")
+@router.post("/sync/trigger")
 async def sync_events(session: AsyncSession = Depends(get_async_session)):
     client = EventsProviderClient()
     repo = EventRepository(session)
