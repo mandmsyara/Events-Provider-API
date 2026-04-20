@@ -29,7 +29,7 @@ class EventRead(EventBase):
     model_config = ConfigDict(from_attributes=True)
 
 
-class EventLisrResponse(BaseModel):
+class EventListResponse(BaseModel):
     next: str | None
     previous: str | None
-    result: list[EventRead]
+    items: list[EventRead]
