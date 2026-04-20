@@ -77,7 +77,4 @@ async def get_event_seats(
     client = EventsProviderClient()
     service = SeatsService(client, repo)
 
-    try:
-        return await service.get_available_seats(event_id)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    return await service.get_available_seats(event_id)

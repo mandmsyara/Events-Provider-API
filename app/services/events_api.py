@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 import httpx
 from app.schemas.event_schema import ExternalEventResponse
 from app.core.config import EXTERNAL_API_KEY, EXTERNAL_API_URL
@@ -44,10 +45,13 @@ class SeatsService:
         event = await self.repo.get_events_by_id(event_id)
 
         if not event:
-            raise Exception("Event not found")
+            raise HTTPException(status_code=404, detail="Event not found")
 
         if event.status != "published":
-            raise Exception("Event is not available for registration")
+            raise HTTPException(
+                status_code=400,
+                detail="Event is not available for registration",
+            )
 
         seats = await self.client.get_seats(str(event_id))
 
