@@ -32,4 +32,4 @@ class EventRead(EventBase):
 class EventListResponse(BaseModel):
     next: str | None
     previous: str | None
-    items: list[EventRead]
+    results: list[EventRead]
