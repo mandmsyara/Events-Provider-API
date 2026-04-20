@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 
+from prometheus_fastapi_instrumentator import Instrumentator
+
 from app.middlewares.redirect import enforce_slash_middleware
 from app.api.routers.health import router as health_router
 from app.api.routers.events import router as events_router
@@ -16,6 +18,8 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan, redirect_slashes=False)
+
+Instrumentator().instrument(app).expose(app)
 
 app.middleware("http")(enforce_slash_middleware)
 
