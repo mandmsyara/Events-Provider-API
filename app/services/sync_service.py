@@ -12,18 +12,28 @@ class EventSyncService:
 
         while True:
 
-            for event_schema in page.results:
-                place_dict = event_schema.place.model_dump()
-                await self.repo.upsert_place(place_dict)
+            try:
+                places = {}
 
-                event_dict = event_schema.model_dump(exclude={"place"})
-                event_dict["place_id"] = event_schema.place.id
+                for event_schema in page.results:
+                    places[event_schema.place.id] = event_schema.place
 
-                await self.repo.upsert_event(event_dict)
+                for place in places.values():
+                    await self.repo.upsert_place(place.model_dump())
 
-            if not page.next():
+                for event_schema in page.results:
+                    event_dict = event_schema.model_dump(exclude={"place"})
+                    event_dict["place_id"] = event_schema.place.id
+
+                    await self.repo.upsert_event(event_dict)
+
+                await self.repo.session.commit()
+
+            except Exception:
+                await self.repo.session.rollback()
+                raise
+
+            if not page.next:
                 break
 
             page = await self.client.fetch_page(url=page.next)
-
-        await self.repo.session.commit()
