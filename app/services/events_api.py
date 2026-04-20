@@ -1,6 +1,7 @@
 import httpx
 from app.schemas.event_schema import ExternalEventResponse
 from app.core.config import EXTERNAL_API_KEY, EXTERNAL_API_URL
+from app.repositories.events import EventRepository
 
 
 class EventsProviderClient:
@@ -17,3 +18,40 @@ class EventsProviderClient:
             )
             response.raise_for_status()
             return ExternalEventResponse(**response.json())
+
+    async def get_seats(self, event_id: str) -> list[str]:
+        url = f"{self.base_url}/api/events/{event_id}/seats/"
+
+        response = await self.client.get(url)
+
+        if response.status_code == 404:
+            raise Exception("Event not found in provider!")
+
+        if response.status_code == 500:
+            raise Exception("Provider error (event not published)!")
+
+        data = response.json()
+
+        return data.get("seats", [])
+
+
+class SeatsService:
+    def __init__(self, client: EventsProviderClient, repo: EventRepository):
+        self.client = client
+        self.repo = repo
+
+    async def get_available_seats(self, event_id):
+        event = await self.repo.get_events_by_id(event_id)
+
+        if not event:
+            raise Exception("Event not found")
+
+        if event.status != "published":
+            raise Exception("Event is not available for registration")
+
+        seats = await self.client.get_seats(str(event_id))
+
+        return {
+            "event_id": event_id,
+            "available_seats": seats,
+        }

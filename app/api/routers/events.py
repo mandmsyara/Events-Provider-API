@@ -8,7 +8,7 @@ from app.services.events_api import EventsProviderClient
 from app.repositories.events import EventRepository
 from app.services.sync_service import EventSyncService
 from app.schemas.event_schema import EventRead, EventListResponse
-
+from app.services.events_api import SeatsService
 
 router = APIRouter(prefix="/api", tags=["Events"])
 
@@ -67,3 +67,17 @@ async def get_event(event_id: UUID, session: AsyncSession = Depends(get_async_se
     if not event:
         raise HTTPException(status_code=404, detail="Event not found")
     return event
+
+
+@router.get("/events/{event_id}/seats/")
+async def get_event_seats(
+    event_id: UUID, session: AsyncSession = Depends(get_async_session)
+):
+    repo = EventRepository(session)
+    client = EventsProviderClient()
+    service = SeatsService(client, repo)
+
+    try:
+        return await service.get_available_seats(event_id)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
