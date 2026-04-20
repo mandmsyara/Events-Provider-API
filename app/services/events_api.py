@@ -13,7 +13,7 @@ class EventsProviderClient:
 
         async with httpx.AsyncClient() as client:
             response = await client.get(
-                target_url, headers=self.headers, timeout=10.0, follow_redirects=True
+                target_url, headers=self.headers, timeout=20.0, follow_redirects=True
             )
             response.raise_for_status()
             return EventLisrResponse(**response.json())

@@ -17,5 +17,5 @@ DATABASE_URL = f"postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTG
 
 EXTERNAL_API_KEY = os.getenv("X_API_KEY")
 EXTERNAL_API_URL = (
-    "http://student-system-events-provider-web.student-system-events-provider.svc:8000/"
+    "http://student-system-events-provider-web.student-system-events-provider.svc:8000"
 )
