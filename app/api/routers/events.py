@@ -1,3 +1,4 @@
+from datetime import date
 from fastapi import APIRouter, Depends, HTTPException, status
 from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -25,11 +26,37 @@ async def sync_events(session: AsyncSession = Depends(get_async_session)):
 
 @router.get("/events/", response_model=list[EventRead])
 async def get_events(
-    limit: int = 10, offset: int = 0, session: AsyncSession = Depends(get_async_session)
+    page: int = 1,
+    page_size: int = 20,
+    date_from: date | None = None,
+    session: AsyncSession = Depends(get_async_session),
 ):
-    repo = EventRepository(session)
-    events = await repo.get_all_events(limit=limit, offset=offset)
-    return events
+    repo = EventRepository
+
+    count = await repo.count_events(date_from=date_from)
+    events = await repo.get_all_events(
+        page=page, page_size=page_size, date_from=date_from
+    )
+
+    next_url = None
+    previous_url = None
+
+    if page * page_size < count:
+        next_url = f"/api/events/?page={page+1}&page_size={page_size}"
+        if date_from:
+            next_url += f"&date_from={date_from}"
+
+    if page > 1:
+        previous_url = f"/api/events/?page={page - 1}&page_size={page_size}"
+        if date_from:
+            previous_url += f"&date_from={date_from}"
+
+    return {
+        "count": count,
+        "next": next_url,
+        "previous": previous_url,
+        "results": events,
+    }
 
 
 @router.get("/events/{event_id}/", response_model=EventRead)

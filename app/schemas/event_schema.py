@@ -30,6 +30,7 @@ class EventRead(EventBase):
 
 
 class EventListResponse(BaseModel):
+    count: int
     next: str | None
     previous: str | None
     results: list[EventRead]

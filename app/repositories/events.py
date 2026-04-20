@@ -1,4 +1,5 @@
-from sqlalchemy import select
+from datetime import date
+from sqlalchemy import select, func
 from sqlalchemy.orm import joinedload
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.dialects.postgresql import insert
@@ -25,13 +26,25 @@ class EventRepository:
 
         await self.session.execute(stmt)
 
-    async def get_all_events(self, limit: int = 100, offset: int = 0):
-        stmt = (
-            select(Event).options(joinedload(Event.place)).limit(limit).offset(offset)
-        )
+    async def get_all_events(
+        self, page: int = 1, page_size: int = 20, date_from: date | None = None
+    ):
+        stmt = select(Event).options(joinedload(Event.place))
+        if date_from:
+            stmt = stmt.where(func.date(Event.event_time) >= date_from)
 
+        stmt = stmt.limit(page_size).offset((page - 1) * page_size)
         result = await self.session.execute(stmt)
         return result.scalars().all()
+
+    async def count_events(self, date_from: date | None = None) -> int:
+        stmt = select(func.count()).select_from(Event)
+
+        if date_from:
+            stmt = stmt.where(func.date(Event.event_time) >= date_from)
+
+        results = await self.session.execute(stmt)
+        return results.scalar_one()
 
     async def get_events_by_id(self, event_id: uuid.UUID):
         stmt = (
