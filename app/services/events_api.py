@@ -16,6 +16,4 @@ class EventsProviderClient:
                 target_url, headers=self.headers, timeout=20.0, follow_redirects=True
             )
             response.raise_for_status()
-            data = response.json()
-            print(f"DEBUG API RESPONSE: {data}")
-            return EventListResponse(**data)
+            return EventListResponse(**response.json())
