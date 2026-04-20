@@ -58,21 +58,25 @@ def run_migrations_offline() -> None:
 def run_migrations_online() -> None:
     from sqlalchemy import create_engine
 
-    url = os.getenv("DATABASE_URL")
-    if not url:
-        url = config.get_main_option("sqlalchemy.url")
+    user = os.getenv("POSTGRES_USERNAME", "postgres")
+    password = os.getenv("POSTGRES_PASSWORD", "postgres")
+    host = os.getenv("POSTGRES_HOST", "localhost")
+    port = os.getenv("POSTGRES_PORT", "5432")
+    db = os.getenv("POSTGRES_DATABASE_NAME", "events_db")
 
-    if "+asyncpg" in url:
-        url = url.replace("+asyncpg", "")
+    database_url = f"postgresql://{user}:{password}@{host}:{port}/{db}"
 
-    engine = create_engine(url)
+    configuration = config.get_section(config.config_ini_section)
+    configuration["sqlalchemy.url"] = database_url
 
-    with engine.connect() as connection:
-        context.configure(
-            connection=connection,
-            target_metadata=target_metadata,
-            compare_type=True,
-        )
+    connectable = engine_from_config(
+        configuration,
+        prefix="sqlalchemy.",
+        poolclass=pool.NullPool,
+    )
+
+    with connectable.connect() as connection:
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()
