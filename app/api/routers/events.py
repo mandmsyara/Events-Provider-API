@@ -84,7 +84,7 @@ async def get_event_seats(
     return await service.get_available_seats(event_id)
 
 
-@router.post("/events/{event_id}/register")
+@router.post("/tickets")
 async def create_ticket(
     payload: TicketCreate, session: AsyncSession = Depends(get_async_session)
 ):
