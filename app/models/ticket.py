@@ -14,10 +14,3 @@ class Ticket(Base):
     last_name = Column(String(255), nullable=False)
     seat = Column(String(10), nullable=False)
     email = Column(String(255), nullable=False)
-
-
-# event_id: UUID
-#     first_name: str
-#     last_name: str
-#     email: EmailStr
-#     seat: str

@@ -61,8 +61,8 @@ class EventsProviderClient:
     async def unregister(self, event_id: str, ticket_id: str):
         url = f"{self.base_url}/api/events/{event_id}/unregister/"
 
-        response = await self.client.delete(
-            url, json={"ticket_id": ticket_id}, follow_redirects=True
+        response = await self.client.request(
+            "DELETE", url, json={"ticket_id": ticket_id}, follow_redirects=True
         )
 
         if response.status_code == 404:
