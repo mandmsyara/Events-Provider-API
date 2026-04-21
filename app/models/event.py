@@ -1,6 +1,8 @@
-from sqlalchemy import Column, String, Integer, ForeignKey, DateTime, UUID
-from sqlalchemy.orm import relationship
 import uuid
+
+from sqlalchemy import UUID, Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy.orm import relationship
+
 from app.database.base import Base
 
 

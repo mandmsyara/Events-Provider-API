@@ -1,5 +1,6 @@
-from fastapi import HTTPException
 import uuid
+
+from fastapi import HTTPException
 
 
 class TicketService:

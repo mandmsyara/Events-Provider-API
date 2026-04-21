@@ -1,8 +1,9 @@
-from fastapi import HTTPException
 import httpx
-from app.schemas.event_schema import ExternalEventResponse
+from fastapi import HTTPException
+
 from app.core.config import EXTERNAL_API_KEY, EXTERNAL_API_URL
 from app.repositories.events import EventRepository
+from app.schemas.event_schema import ExternalEventResponse
 
 
 class EventsProviderClient:

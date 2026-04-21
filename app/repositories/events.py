@@ -1,11 +1,13 @@
+import uuid
 from datetime import date
-from sqlalchemy import select, func
-from sqlalchemy.orm import joinedload
-from sqlalchemy.ext.asyncio import AsyncSession
+
+from sqlalchemy import func, select
 from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload
+
 from app.models.event import Event
 from app.models.place import Place
-import uuid
 
 
 class EventRepository:

@@ -1,16 +1,16 @@
 from datetime import date
-from fastapi import APIRouter, Depends, HTTPException, status
 from uuid import UUID
+
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.session import get_async_session
-from app.services.events_api import EventsProviderClient
 from app.repositories.events import EventRepository
-from app.services.sync_service import EventSyncService
-from app.schemas.event_schema import EventRead, EventListResponse
-from app.services.events_api import SeatsService
-from app.schemas.tickets import TicketCreate
 from app.repositories.tickets import TicketRepository
+from app.schemas.event_schema import EventListResponse, EventRead
+from app.schemas.tickets import TicketCreate
+from app.services.events_api import EventsProviderClient, SeatsService
+from app.services.sync_service import EventSyncService
 from app.services.ticket_service import TicketService
 
 router = APIRouter(prefix="/api", tags=["Events"])

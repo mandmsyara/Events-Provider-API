@@ -1,15 +1,10 @@
 import os
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
+from sqlalchemy import engine_from_config, pool
 
 from alembic import context
-
 from app.database.base import Base
-from app.models.event import Event
-from app.models.place import Place
-from app.models.ticket import Ticket
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -57,7 +52,6 @@ def run_migrations_offline() -> None:
 
 
 def run_migrations_online() -> None:
-    from sqlalchemy import create_engine
 
     user = os.getenv("POSTGRES_USERNAME", "postgres")
     password = os.getenv("POSTGRES_PASSWORD", "postgres")

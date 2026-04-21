@@ -1,13 +1,13 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-from contextlib import asynccontextmanager
-
 from prometheus_fastapi_instrumentator import Instrumentator
 
-from app.middlewares.redirect import enforce_slash_middleware
-from app.api.routers.health import router as health_router
 from app.api.routers.events import router as events_router
+from app.api.routers.health import router as health_router
+from app.middlewares.redirect import enforce_slash_middleware
 
 
 @asynccontextmanager
