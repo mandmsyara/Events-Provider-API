@@ -44,3 +44,16 @@ class TicketService:
         await self.ticket_repo.session.commit()
 
         return {"ticket_id": ticket.id}
+
+    async def delete_ticket(self, ticket_id):
+        ticket = await self.ticket_repo.get_by_id(uuid.UUID(ticket_id))
+
+        if not ticket:
+            raise HTTPException(status_code=404, detail="Ticket is not found")
+
+        await self.client.unregister(str(ticket.event_id), str(ticket.id))
+
+        await self.ticket_repo.delete(ticket)
+        await self.ticket_repo.session.commit()
+
+        return {"success": True}

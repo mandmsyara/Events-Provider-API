@@ -84,7 +84,7 @@ async def get_event_seats(
     return await service.get_available_seats(event_id)
 
 
-@router.post("/tickets")
+@router.post("/tickets", status_code=201)
 async def create_ticket(
     payload: TicketCreate, session: AsyncSession = Depends(get_async_session)
 ):
@@ -95,3 +95,16 @@ async def create_ticket(
     service = TicketService(client, event_repo, ticket_repo)
 
     return await service.create_ticket(payload)
+
+
+@router.delete("/tickets/{ticket_id}")
+async def delete_ticket(
+    ticket_id: str, session: AsyncSession = Depends(get_async_session)
+):
+    event_repo = EventRepository(session)
+    ticket_repo = TicketRepository(session)
+    client = EventsProviderClient()
+
+    service = TicketService(client, event_repo, ticket_repo)
+
+    return await service.delete_ticket(ticket_id)

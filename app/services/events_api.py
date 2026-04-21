@@ -37,7 +37,7 @@ class EventsProviderClient:
     async def register(
         self, event_id: str, first_name: str, last_name: str, email: str, seat: str
     ) -> str:
-        url = f"{self.base_url}/api/events/{event_id}/register"
+        url = f"{self.base_url}/api/events/{event_id}/register/"
 
         payload = {
             "first_name": first_name,
@@ -46,17 +46,31 @@ class EventsProviderClient:
             "seat": seat,
         }
 
-        response = await self.client.post(url, json=payload)
+        response = await self.client.post(url, json=payload, follow_redirects=True)
 
         if response.status_code == 400:
-            raise Exception("Seat already taken")
+            raise HTTPException(status_code=400, details="Seat already taken")
 
         if response.status_code == 404:
-            raise Exception("Event not found")
+            raise HTTPException(status_code=404, details="Event not found")
 
         response.raise_for_status()
 
         return response.json()["ticket_id"]
+
+    async def unregister(self, event_id: str, ticket_id: str):
+        url = f"{self.base_url}/api/events/{event_id}/unregister/"
+
+        response = await self.client.delete(
+            url, json={"ticket_id": ticket_id}, follow_redirects=True
+        )
+
+        if response.status_code == 404:
+            raise HTTPException(status_code=404, details="Ticket not found")
+
+        response.raise_for_status()
+
+        return True
 
 
 class SeatsService:
