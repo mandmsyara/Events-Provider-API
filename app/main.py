@@ -9,8 +9,8 @@ from prometheus_fastapi_instrumentator import Instrumentator
 
 from app.api.routers.events import router as events_router
 from app.api.routers.health import router as health_router
-from app.services.background_sync import sync_loop
 from app.middlewares.redirect import enforce_slash_middleware
+from app.services.background_sync import sync_loop
 
 logger = logging.getLogger(__name__)
 
