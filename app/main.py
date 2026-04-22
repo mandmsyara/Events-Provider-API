@@ -12,6 +12,11 @@ from app.api.routers.health import router as health_router
 from app.middlewares.redirect import enforce_slash_middleware
 from app.services.background_sync import sync_loop
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] [%(name)s] %(message)s",
+)
+
 logger = logging.getLogger(__name__)
 
 
