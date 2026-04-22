@@ -100,7 +100,7 @@ async def create_ticket(
     return await service.create_ticket(payload)
 
 
-@router.delete("/tickets/{ticket_id}")
+@router.delete("/tickets/{ticket_id}/")
 async def delete_ticket(
     ticket_id: str, session: AsyncSession = Depends(get_async_session)
 ):
