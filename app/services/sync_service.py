@@ -1,9 +1,9 @@
 import logging
 from datetime import datetime
 
+from app.clients.events_provider import EventsProviderClient
 from app.repositories.events import EventRepository
 from app.repositories.sync_state import SyncStateRepository
-from app.clients.events_provider import EventsProviderClient
 
 logger = logging.getLogger(__name__)
 

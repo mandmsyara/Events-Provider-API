@@ -1,15 +1,16 @@
 import uuid
 from uuid import UUID
+
 from app.clients.events_provider import EventsProviderClient
-from app.repositories.events import EventRepository
-from app.repositories.tickets import TicketRepository
+from app.core.enums import EventStatus
 from app.exception.exceptions import (
     EventNotAvailableError,
     EventNotFoundError,
     SeatNotAvailableError,
     TicketNotFoundError,
 )
-from app.core.enums import EventStatus
+from app.repositories.events import EventRepository
+from app.repositories.tickets import TicketRepository
 
 
 class TicketService:

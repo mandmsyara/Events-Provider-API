@@ -4,7 +4,15 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.clients.events_provider import EventsProviderClient
 from app.database.session import get_async_session
+from app.exception.exceptions import (
+    EventNotAvailableError,
+    EventNotFoundError,
+    ProviderRequestError,
+    SeatNotAvailableError,
+    TicketNotFoundError,
+)
 from app.repositories.events import EventRepository
 from app.repositories.sync_state import SyncStateRepository
 from app.repositories.tickets import TicketRepository
@@ -12,16 +20,8 @@ from app.schemas.event_schema import EventListResponse, EventRead
 from app.schemas.tickets import TicketCreate, TicketResponse
 from app.services.events_service import EventQueryService
 from app.services.seats_service import SeatsService
-from app.clients.events_provider import EventsProviderClient
 from app.services.sync_service import EventSyncService
 from app.services.ticket_service import TicketService
-from app.exception.exceptions import (
-    EventNotFoundError,
-    EventNotAvailableError,
-    TicketNotFoundError,
-    ProviderRequestError,
-    SeatNotAvailableError,
-)
 
 router = APIRouter(prefix="/api", tags=["Events"])
 

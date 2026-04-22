@@ -1,7 +1,7 @@
 import httpx
 
-from app.exception.exceptions import ProviderRequestError, TicketNotFoundError
 from app.core.config import EXTERNAL_API_KEY, EXTERNAL_API_URL
+from app.exception.exceptions import ProviderRequestError, TicketNotFoundError
 from app.schemas.event_schema import ExternalEventResponse
 
 

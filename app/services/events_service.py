@@ -1,8 +1,8 @@
 from datetime import date
 from uuid import UUID
 
-from app.repositories.events import EventRepository
 from app.exception.exceptions import EventNotFoundError
+from app.repositories.events import EventRepository
 
 
 class EventQueryService:

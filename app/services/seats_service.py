@@ -1,7 +1,7 @@
 from app.clients.events_provider import EventsProviderClient
-from app.repositories.events import EventRepository
-from app.exception.exceptions import EventNotAvailableError, EventNotFoundError
 from app.core.enums import EventStatus
+from app.exception.exceptions import EventNotAvailableError, EventNotFoundError
+from app.repositories.events import EventRepository
 
 
 class SeatsService:
