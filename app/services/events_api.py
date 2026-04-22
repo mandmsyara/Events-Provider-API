@@ -12,12 +12,22 @@ class EventsProviderClient:
         self.headers = {"x-api-key": EXTERNAL_API_KEY}
         self.client = httpx.AsyncClient(headers=self.headers)
 
-    async def fetch_page(self, url: str | None = None) -> ExternalEventResponse:
-        target_url = url or f"{self.base_url}/api/events/"
+    async def fetch_page(
+        self, url: str | None = None, changed_at: str | None = None
+    ) -> ExternalEventResponse:
+        if url:
+            target_url = url
+        else:
+            changed_at_value = changed_at or "2000-01-01"
+            target_url = (
+                url or f"{self.base_url}/api/events/?changed_at={changed_at_value}"
+            )
+
         response = await self.client.get(
             target_url, timeout=20.0, follow_redirects=True
         )
         response.raise_for_status()
+
         return ExternalEventResponse(**response.json())
 
     async def get_seats(self, event_id: str) -> list[str]:

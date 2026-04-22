@@ -12,15 +12,18 @@ from app.schemas.tickets import TicketCreate
 from app.services.events_api import EventsProviderClient, SeatsService
 from app.services.sync_service import EventSyncService
 from app.services.ticket_service import TicketService
+from app.repositories.sync_state import SyncStateRepository
 
 router = APIRouter(prefix="/api", tags=["Events"])
 
 
-@router.post("/sync/trigger")
+@router.post("/sync/trigger/")
 async def sync_events(session: AsyncSession = Depends(get_async_session)):
     client = EventsProviderClient()
     repo = EventRepository(session)
-    service = EventSyncService(client, repo)
+    sync_state_repo = SyncStateRepository(session)
+
+    service = EventSyncService(client, repo, sync_state_repo)
     started = await service.sync_all()
 
     if not started:
@@ -84,7 +87,7 @@ async def get_event_seats(
     return await service.get_available_seats(event_id)
 
 
-@router.post("/tickets", status_code=201)
+@router.post("/tickets/", status_code=201)
 async def create_ticket(
     payload: TicketCreate, session: AsyncSession = Depends(get_async_session)
 ):
