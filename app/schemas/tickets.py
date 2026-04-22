@@ -11,5 +11,5 @@ class TicketCreate(BaseModel):
     seat: str
 
 
-class TickerResponse(BaseModel):
+class TicketResponse(BaseModel):
     ticket_id: UUID

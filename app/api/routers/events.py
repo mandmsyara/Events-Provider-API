@@ -9,7 +9,7 @@ from app.repositories.events import EventRepository
 from app.repositories.sync_state import SyncStateRepository
 from app.repositories.tickets import TicketRepository
 from app.schemas.event_schema import EventListResponse, EventRead
-from app.schemas.tickets import TicketCreate
+from app.schemas.tickets import TicketCreate, TicketResponse
 from app.services.events_api import EventsProviderClient, SeatsService
 from app.services.sync_service import EventSyncService
 from app.services.ticket_service import TicketService
@@ -87,7 +87,7 @@ async def get_event_seats(
     return await service.get_available_seats(event_id)
 
 
-@router.post("/tickets/", status_code=201)
+@router.post("/tickets/", status_code=201, response_model=TicketResponse)
 async def create_ticket(
     payload: TicketCreate, session: AsyncSession = Depends(get_async_session)
 ):
