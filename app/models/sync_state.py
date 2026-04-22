@@ -8,9 +8,9 @@ class SyncState(Base):
     __tablename__ = "sync_state"
 
     id = Column(Integer, primary_key=True)
-    last_sync_time = Column(DateTime(timezone=True), nullable=False)
-    last_changed_at = Column(DateTime(timezone=True), nullable=False)
-    sync_status = Column(String(255), nullable=False, default="idle")
+    last_sync_time = Column(DateTime(timezone=True), nullable=True)
+    last_changed_at = Column(DateTime(timezone=True), nullable=True)
+    sync_status = Column(String(255), nullable=True, default="idle")
     created_at = Column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
