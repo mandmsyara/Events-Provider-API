@@ -4,6 +4,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
 
+from app.core.enums import EventStatus
 from app.schemas.place_schema import PlaceRead
 
 
@@ -11,7 +12,7 @@ class EventBase(BaseModel):
     name: str
     event_time: datetime
     registration_deadline: datetime
-    status: str = "published"
+    status: EventStatus
     number_of_visitors: int = 0
 
 

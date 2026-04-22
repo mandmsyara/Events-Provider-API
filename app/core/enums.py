@@ -6,3 +6,10 @@ class EventStatus(StrEnum):
     PUBLISHED = "published"
     REGISTRATION_CLOSED = "registration_closed"
     FINISHED = "finished"
+
+
+class SyncStatus(StrEnum):
+    IDLE = "idle"
+    RUNNING = "running"
+    SUCCESS = "success"
+    FAILED = "failed"

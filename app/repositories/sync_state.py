@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.enums import SyncStatus
 from app.models.sync_state import SyncState
 
 
@@ -20,20 +21,20 @@ class SyncStateRepository:
         if state:
             return state
 
-        state = SyncState(id=1, sync_status="idle")
+        state = SyncState(id=1, sync_status=SyncStatus.IDLE)
         self.session.add(state)
         await self.session.flush()
         return state
 
     async def mark_running(self) -> SyncState:
         state = await self.get_or_create()
-        state.sync_status = "running"
+        state.sync_status = SyncStatus.RUNNING
         await self.session.flush()
         return state
 
     async def mark_success(self, last_changed_at: datetime | None) -> SyncState:
         state = await self.get_or_create()
-        state.sync_status = "succes"
+        state.sync_status = SyncStatus.SUCCESS
         state.last_sync_time = datetime.now(timezone.utc)
 
         if last_changed_at is not None:
@@ -43,7 +44,7 @@ class SyncStateRepository:
 
     async def mark_failed(self) -> SyncState:
         state = await self.get_or_create()
-        state.sync_status = "failed"
+        state.sync_status = SyncStatus.FAILED
         state.last_sync_time = datetime.now(timezone.utc)
         await self.session.flush()
         return state
