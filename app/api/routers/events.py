@@ -87,7 +87,7 @@ async def get_event_seats(
     return await service.get_available_seats(event_id)
 
 
-@router.post("/tickets/", status_code=201, response_model=TicketResponse)
+@router.post("/tickets", status_code=201, response_model=TicketResponse)
 async def create_ticket(
     payload: TicketCreate, session: AsyncSession = Depends(get_async_session)
 ):
@@ -100,7 +100,7 @@ async def create_ticket(
     return await service.create_ticket(payload)
 
 
-@router.delete("/tickets/{ticket_id}/")
+@router.delete("/tickets/{ticket_id}")
 async def delete_ticket(
     ticket_id: str, session: AsyncSession = Depends(get_async_session)
 ):
