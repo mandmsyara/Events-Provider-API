@@ -1,5 +1,5 @@
 import httpx
-
+from urllib.parse import urljoin
 from app.core.config import EXTERNAL_API_KEY, EXTERNAL_API_URL
 from app.exception.exceptions import ProviderRequestError, TicketNotFoundError
 from app.schemas.event_schema import ExternalEventResponse
@@ -19,8 +19,8 @@ class EventsProviderClient:
             target_url = url
         else:
             changed_at_value = changed_at or "2000-01-01"
-            target_url = (
-                url or f"{self.base_url}/api/events/?changed_at={changed_at_value}"
+            target_url = urljoin(
+                self.base_url, "/api/events/?changed_at={}".format(changed_at_value)
             )
 
         response = await self.client.get(
@@ -31,7 +31,7 @@ class EventsProviderClient:
         return ExternalEventResponse(**response.json())
 
     async def get_seats(self, event_id: str) -> list[str]:
-        url = f"{self.base_url}/api/events/{event_id}/seats/"
+        url = urljoin(self.base_url, "/api/events/{}/seats/".format(event_id))
 
         response = await self.client.get(url, timeout=20.0, follow_redirects=True)
 
@@ -49,8 +49,7 @@ class EventsProviderClient:
     async def register(
         self, event_id: str, first_name: str, last_name: str, email: str, seat: str
     ) -> str:
-
-        url = f"{self.base_url}/api/events/{event_id}/register/"
+        url = urljoin(self.base_url, "/api/events/{}/register/".format(event_id))
 
         payload = {
             "first_name": first_name,
@@ -71,8 +70,8 @@ class EventsProviderClient:
 
         return response.json()["ticket_id"]
 
-    async def unregister(self, event_id: str, ticket_id: str):
-        url = f"{self.base_url}/api/events/{event_id}/unregister/"
+    async def unregister(self, event_id: str, ticket_id: str) -> bool:
+        url = urljoin(self.base_url, "/api/events/{}/unregister/".format(event_id))
 
         response = await self.client.request(
             "DELETE", url, json={"ticket_id": ticket_id}, follow_redirects=True
@@ -84,3 +83,6 @@ class EventsProviderClient:
         response.raise_for_status()
 
         return True
+
+    async def close(self):
+        await self.client.aclose()

@@ -2,7 +2,7 @@ from enum import StrEnum
 
 
 class EventStatus(StrEnum):
-    NEW = "mew"
+    NEW = "new"
     PUBLISHED = "published"
     REGISTRATION_CLOSED = "registration_closed"
     FINISHED = "finished"
