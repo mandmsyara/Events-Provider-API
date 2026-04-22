@@ -31,7 +31,7 @@ class SyncStateRepository:
         await self.session.flush()
         return state
 
-    async def mark_succes(self, last_changed_at: datetime | None) -> SyncState:
+    async def mark_success(self, last_changed_at: datetime | None) -> SyncState:
         state = await self.get_or_create()
         state.sync_status = "succes"
         state.last_sync_time = datetime.now(timezone.utc)

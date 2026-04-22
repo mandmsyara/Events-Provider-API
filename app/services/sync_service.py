@@ -3,7 +3,7 @@ from datetime import datetime
 
 from app.repositories.events import EventRepository
 from app.repositories.sync_state import SyncStateRepository
-from app.services.events_api import EventsProviderClient
+from app.clients.events_provider import EventsProviderClient
 
 logger = logging.getLogger(__name__)
 
@@ -80,10 +80,12 @@ class EventSyncService:
 
                 page = await self.client.fetch_page(url=page.next)
 
-            await self.sync_state_repo.mark_succes(max_changed_at)
+            await self.sync_state_repo.mark_success(max_changed_at)
             await self.repo.session.commit()
 
-            logger.info("Sync finished succefully, last_changed_at=%s", max_changed_at)
+            logger.info(
+                "Sync finished successfully, last_changed_at=%s", max_changed_at
+            )
 
             return True
         except Exception:

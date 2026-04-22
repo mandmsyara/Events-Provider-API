@@ -1,8 +1,7 @@
 import httpx
-from fastapi import HTTPException
 
+from app.exception.exceptions import ProviderRequestError, TicketNotFoundError
 from app.core.config import EXTERNAL_API_KEY, EXTERNAL_API_URL
-from app.repositories.events import EventRepository
 from app.schemas.event_schema import ExternalEventResponse
 
 
@@ -15,6 +14,7 @@ class EventsProviderClient:
     async def fetch_page(
         self, url: str | None = None, changed_at: str | None = None
     ) -> ExternalEventResponse:
+
         if url:
             target_url = url
         else:
@@ -33,14 +33,15 @@ class EventsProviderClient:
     async def get_seats(self, event_id: str) -> list[str]:
         url = f"{self.base_url}/api/events/{event_id}/seats/"
 
-        response = await self.client.get(url)
+        response = await self.client.get(url, timeout=20.0, follow_redirects=True)
 
         if response.status_code == 404:
-            raise Exception("Event not found in provider!")
+            raise ProviderRequestError("Event not found in provider")
 
         if response.status_code == 500:
-            raise Exception("Provider error (event not published)!")
+            raise ProviderRequestError("Provider error while fetching seats")
 
+        response.raise_for_status()
         data = response.json()
 
         return data.get("seats", [])
@@ -48,6 +49,7 @@ class EventsProviderClient:
     async def register(
         self, event_id: str, first_name: str, last_name: str, email: str, seat: str
     ) -> str:
+
         url = f"{self.base_url}/api/events/{event_id}/register/"
 
         payload = {
@@ -60,10 +62,10 @@ class EventsProviderClient:
         response = await self.client.post(url, json=payload, follow_redirects=True)
 
         if response.status_code == 400:
-            raise HTTPException(status_code=400, details="Seat already taken")
+            raise ProviderRequestError("Seat already taken")
 
         if response.status_code == 404:
-            raise HTTPException(status_code=404, details="Event not found")
+            raise ProviderRequestError("Event not found")
 
         response.raise_for_status()
 
@@ -77,33 +79,8 @@ class EventsProviderClient:
         )
 
         if response.status_code == 404:
-            raise HTTPException(status_code=404, details="Ticket not found")
+            raise TicketNotFoundError()
 
         response.raise_for_status()
 
         return True
-
-
-class SeatsService:
-    def __init__(self, client: EventsProviderClient, repo: EventRepository):
-        self.client = client
-        self.repo = repo
-
-    async def get_available_seats(self, event_id):
-        event = await self.repo.get_events_by_id(event_id)
-
-        if not event:
-            raise HTTPException(status_code=404, detail="Event not found")
-
-        if event.status != "published":
-            raise HTTPException(
-                status_code=400,
-                detail="Event is not available for registration",
-            )
-
-        seats = await self.client.get_seats(str(event_id))
-
-        return {
-            "event_id": event_id,
-            "available_seats": seats,
-        }

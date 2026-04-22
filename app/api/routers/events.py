@@ -10,9 +10,18 @@ from app.repositories.sync_state import SyncStateRepository
 from app.repositories.tickets import TicketRepository
 from app.schemas.event_schema import EventListResponse, EventRead
 from app.schemas.tickets import TicketCreate, TicketResponse
-from app.services.events_api import EventsProviderClient, SeatsService
+from app.services.events_service import EventQueryService
+from app.services.seats_service import SeatsService
+from app.clients.events_provider import EventsProviderClient
 from app.services.sync_service import EventSyncService
 from app.services.ticket_service import TicketService
+from app.exception.exceptions import (
+    EventNotFoundError,
+    EventNotAvailableError,
+    TicketNotFoundError,
+    ProviderRequestError,
+    SeatNotAvailableError,
+)
 
 router = APIRouter(prefix="/api", tags=["Events"])
 
@@ -39,41 +48,19 @@ async def get_events(
     session: AsyncSession = Depends(get_async_session),
 ):
     repo = EventRepository(session)
+    service = EventQueryService(repo)
 
-    count = await repo.count_events(date_from=date_from)
-    events = await repo.get_all_events(
-        page=page, page_size=page_size, date_from=date_from
-    )
-
-    next_url = None
-    previous_url = None
-
-    if page * page_size < count:
-        next_url = f"/api/events/?page={page+1}&page_size={page_size}"
-        if date_from:
-            next_url += f"&date_from={date_from}"
-
-    if page > 1:
-        previous_url = f"/api/events/?page={page - 1}&page_size={page_size}"
-        if date_from:
-            previous_url += f"&date_from={date_from}"
-
-    return {
-        "count": count,
-        "next": next_url,
-        "previous": previous_url,
-        "results": events,
-    }
+    return await service.get_events(page=page, page_size=page_size, date_from=date_from)
 
 
 @router.get("/events/{event_id}/", response_model=EventRead)
 async def get_event(event_id: UUID, session: AsyncSession = Depends(get_async_session)):
     repo = EventRepository(session)
-    event = await repo.get_events_by_id(event_id)
-
-    if not event:
+    service = EventQueryService(repo)
+    try:
+        return await service.get_event(event_id)
+    except EventNotFoundError:
         raise HTTPException(status_code=404, detail="Event not found")
-    return event
 
 
 @router.get("/events/{event_id}/seats/")
@@ -83,8 +70,19 @@ async def get_event_seats(
     repo = EventRepository(session)
     client = EventsProviderClient()
     service = SeatsService(client, repo)
+    try:
+        return await service.get_available_seats(event_id)
 
-    return await service.get_available_seats(event_id)
+    except EventNotFoundError:
+        raise HTTPException(status_code=404, detail="Event not found")
+
+    except EventNotAvailableError:
+        raise HTTPException(
+            status_code=400, detail="Event is not available for registration"
+        )
+
+    except ProviderRequestError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.post("/tickets", status_code=201, response_model=TicketResponse)
@@ -97,7 +95,22 @@ async def create_ticket(
 
     service = TicketService(client, event_repo, ticket_repo)
 
-    return await service.create_ticket(payload)
+    try:
+        return await service.create_ticket(payload)
+
+    except EventNotFoundError:
+        raise HTTPException(status_code=404, detail="Event not found")
+
+    except EventNotAvailableError:
+        raise HTTPException(
+            status_code=400, detail="Event is not available for registration"
+        )
+
+    except SeatNotAvailableError:
+        raise HTTPException(status_code=400, detail="Seat not available")
+
+    except ProviderRequestError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.delete("/tickets/{ticket_id}")
@@ -110,4 +123,10 @@ async def delete_ticket(
 
     service = TicketService(client, event_repo, ticket_repo)
 
-    return await service.delete_ticket(ticket_id)
+    try:
+        return await service.delete_ticket(ticket_id)
+
+    except TicketNotFoundError:
+        raise HTTPException(status_code=404, detail="Ticket not found")
+    except ProviderRequestError as e:
+        raise HTTPException(status_code=400, detail=str(e))
