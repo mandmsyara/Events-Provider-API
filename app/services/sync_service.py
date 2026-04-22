@@ -1,10 +1,9 @@
-import asyncio
 import logging
 from datetime import datetime
 
 from app.repositories.events import EventRepository
-from app.services.events_api import EventsProviderClient
 from app.repositories.sync_state import SyncStateRepository
+from app.services.events_api import EventsProviderClient
 
 logger = logging.getLogger(__name__)
 
