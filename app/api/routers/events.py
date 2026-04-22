@@ -17,7 +17,7 @@ from app.services.ticket_service import TicketService
 router = APIRouter(prefix="/api", tags=["Events"])
 
 
-@router.post("/sync/trigger/")
+@router.post("/sync/trigger")
 async def sync_events(session: AsyncSession = Depends(get_async_session)):
     client = EventsProviderClient()
     repo = EventRepository(session)
