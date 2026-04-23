@@ -3,6 +3,7 @@ from unittest.mock import AsyncMock
 import pytest
 
 from app.services.events_paginator import EventsPaginator
+from app.schemas.event_schema import ExternalEventResponse
 
 
 class DummyPage:
@@ -29,3 +30,27 @@ async def test_events_paginator_iterals_all_pages():
 
     client.fetch_page.assert_any_call(changed_at="2000-01-01")
     client.fetch_page.assert_any_call(url="url-2")
+
+
+@pytest.mark.asyncio
+async def test_events_paginator_single_page():
+    client = AsyncMock()
+
+    page = ExternalEventResponse(
+        next=None,
+        previous=None,
+        results=[],
+    )
+
+    client.fetch_page.return_value = page
+
+    paginator = EventsPaginator(client=client, changed_at="2000-01-01")
+
+    pages = []
+    async for p in paginator:
+        pages.append(p)
+
+    assert len(pages) == 1
+    assert pages[0] == page
+
+    client.fetch_page.assert_called_once_with(changed_at="2000-01-01")
