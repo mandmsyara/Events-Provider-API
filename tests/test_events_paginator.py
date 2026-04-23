@@ -2,8 +2,8 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from app.services.events_paginator import EventsPaginator
 from app.schemas.event_schema import ExternalEventResponse
+from app.services.events_paginator import EventsPaginator
 
 
 class DummyPage:
