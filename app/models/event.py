@@ -24,7 +24,12 @@ class Event(Base):
         DateTime(timezone=True), nullable=False
     )
     status: Mapped[EventStatus] = mapped_column(
-        Enum(EventStatus), name="event_status_enum", nullable=False
+        Enum(
+            EventStatus,
+            values_callable=lambda e: [i.value for i in e],
+            name="event_status_enum",
+        ),
+        nullable=False,
     )
     number_of_visitors: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     changed_at: Mapped[datetime | None] = mapped_column(
@@ -33,7 +38,7 @@ class Event(Base):
     created_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
-    status_changed_at: Mapped[datetime] = mapped_column(
+    status_changed_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
 

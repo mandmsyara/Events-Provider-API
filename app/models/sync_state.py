@@ -19,7 +19,13 @@ class SyncState(Base):
         DateTime(timezone=True), nullable=True
     )
     sync_status: Mapped[SyncStatus] = mapped_column(
-        Enum(SyncStatus), nullable=False, default=SyncStatus.IDLE
+        Enum(
+            SyncStatus,
+            name="sync_status_enum",
+            values_callable=lambda e: [i.value for i in e],
+        ),
+        nullable=False,
+        default=SyncStatus.IDLE,
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
