@@ -76,7 +76,13 @@ def upgrade() -> None:
         existing_nullable=True,
         nullable=False,
     )
-
+    op.execute(
+        """
+        UPDATE sync_state
+        SET sync_status = 'success'
+        WHERE sync_status = 'succes'
+        """
+    )
     op.alter_column(
         "sync_state",
         "sync_status",
