@@ -13,3 +13,8 @@ class SyncStatus(StrEnum):
     RUNNING = "running"
     SUCCESS = "success"
     FAILED = "failed"
+
+
+class OutboxStatus(StrEnum):
+    PENDING = "pending"
+    SENT = "sent"

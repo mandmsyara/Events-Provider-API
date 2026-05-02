@@ -16,6 +16,7 @@ from app.exception.exceptions import (
 from app.repositories.events import EventRepository
 from app.repositories.sync_state import SyncStateRepository
 from app.repositories.tickets import TicketRepository
+from app.repositories.outbox import OutboxRepository
 from app.schemas.event_schema import EventListResponse, EventRead
 from app.schemas.tickets import TicketCreate, TicketResponse
 from app.services.events_service import EventQueryService
@@ -91,9 +92,10 @@ async def create_ticket(
 ):
     event_repo = EventRepository(session)
     ticket_repo = TicketRepository(session)
+    outbox_repo = OutboxRepository(session)
     client = EventsProviderClient()
 
-    service = TicketService(client, event_repo, ticket_repo)
+    service = TicketService(client, event_repo, ticket_repo, outbox_repo)
 
     try:
         return await service.create_ticket(payload)
@@ -119,9 +121,10 @@ async def delete_ticket(
 ):
     event_repo = EventRepository(session)
     ticket_repo = TicketRepository(session)
+    outbox_repo = OutboxRepository(session)
     client = EventsProviderClient()
 
-    service = TicketService(client, event_repo, ticket_repo)
+    service = TicketService(client, event_repo, ticket_repo, outbox_repo)
 
     try:
         return await service.delete_ticket(ticket_id)

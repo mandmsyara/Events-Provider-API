@@ -11,6 +11,7 @@ from app.exception.exceptions import (
 )
 from app.repositories.events import EventRepository
 from app.repositories.tickets import TicketRepository
+from app.repositories.outbox import OutboxRepository
 
 
 class TicketService:
@@ -19,10 +20,12 @@ class TicketService:
         client: EventsProviderClient,
         event_repo: EventRepository,
         ticket_repo: TicketRepository,
+        outbox_repo: OutboxRepository,
     ):
         self.client = client
         self.event_repo = event_repo
         self.ticket_repo = ticket_repo
+        self.outbox_repo = outbox_repo
 
     async def create_ticket(self, data):
         event = await self.event_repo.get_events_by_id(data.event_id)
@@ -56,7 +59,20 @@ class TicketService:
                 "email": data.email,
             }
         )
-
+        await self.outbox_repo.create(
+            {
+                "event_type": "ticket_created",
+                "payload": {
+                    "ticket_id": str(ticket.id),
+                    "event_id": str(event.id),
+                    "event_title": event.title,
+                    "seat": ticket.seat,
+                    "email": ticket.email,
+                    "first_name": ticket.first_name,
+                    "last_name": ticket.last_name,
+                },
+            }
+        )
         await self.ticket_repo.session.commit()
 
         return {"ticket_id": ticket.id}
