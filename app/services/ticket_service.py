@@ -10,8 +10,8 @@ from app.exception.exceptions import (
     TicketNotFoundError,
 )
 from app.repositories.events import EventRepository
-from app.repositories.tickets import TicketRepository
 from app.repositories.outbox import OutboxRepository
+from app.repositories.tickets import TicketRepository
 
 
 class TicketService:

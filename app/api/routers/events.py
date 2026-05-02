@@ -14,9 +14,9 @@ from app.exception.exceptions import (
     TicketNotFoundError,
 )
 from app.repositories.events import EventRepository
+from app.repositories.outbox import OutboxRepository
 from app.repositories.sync_state import SyncStateRepository
 from app.repositories.tickets import TicketRepository
-from app.repositories.outbox import OutboxRepository
 from app.schemas.event_schema import EventListResponse, EventRead
 from app.schemas.tickets import TicketCreate, TicketResponse
 from app.services.events_service import EventQueryService

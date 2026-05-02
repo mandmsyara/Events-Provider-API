@@ -1,12 +1,13 @@
-from uuid import UUID, uuid4
 from datetime import datetime
+from uuid import UUID, uuid4
 
+from sqlalchemy import DateTime, Enum, Index, String, func
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy.dialects.postgresql import UUID as PG_UUID, JSONB
 
-from sqlalchemy import String, Enum, DateTime, func, Index
-from app.database.base import Base
 from app.core.enums import OutboxStatus
+from app.database.base import Base
 
 
 class Outbox(Base):

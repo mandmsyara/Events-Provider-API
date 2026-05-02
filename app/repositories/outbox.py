@@ -1,8 +1,8 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.outbox import Outbox
 from app.core.enums import OutboxStatus
+from app.models.outbox import Outbox
 
 
 class OutboxRepository:
