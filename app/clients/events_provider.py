@@ -2,15 +2,15 @@ from urllib.parse import urljoin
 
 import httpx
 
-from app.core.config import EXTERNAL_API_KEY, EXTERNAL_API_URL
+from app.core.config import settings
 from app.exception.exceptions import ProviderRequestError, TicketNotFoundError
 from app.schemas.event_schema import ExternalEventResponse
 
 
 class EventsProviderClient:
     def __init__(self):
-        self.base_url = EXTERNAL_API_URL
-        self.headers = {"x-api-key": EXTERNAL_API_KEY}
+        self.base_url = settings.external_api_url
+        self.headers = {"x-api-key": settings.x_api_key}
         self.client = httpx.AsyncClient(headers=self.headers)
 
     async def fetch_page(

@@ -1,18 +1,31 @@
-import os
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from dotenv import load_dotenv
 
-load_dotenv()
+class Settings(BaseSettings):
+    postgres_username: str
+    postgres_password: str
+    postgres_host: str
+    postgres_port: str = "5432"
+    postgres_database_name: str
 
-POSTGRES_USER = os.getenv("POSTGRES_USERNAME")
-POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD")
-POSTGRES_HOST = os.getenv("POSTGRES_HOST")
-POSTGRES_PORT = os.getenv("POSTGRES_PORT", "5432")
-POSTGRES_DB = os.getenv("POSTGRES_DATABASE_NAME")
+    x_api_key: str
+    external_api_url: str = (
+        "http://student-system-events-provider-web.student-system-events-provider.svc:8000"
+    )
 
-DATABASE_URL = f"postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
+    capashino_api_url: str = (
+        "http://student-system-capashino-web.student-system-capashino.svc:8000"
+    )
+    capashino_api_key: str
 
-EXTERNAL_API_KEY = os.getenv("X_API_KEY")
-EXTERNAL_API_URL = (
-    "http://student-system-events-provider-web.student-system-events-provider.svc:8000"
-)
+    outbox_worker_interval: int = 5
+    outbox_batch_size: int = 10
+
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+
+    @property
+    def database_url(self) -> str:
+        return f"postgresql+asyncpg://{self.postgres_username}:{self.postgres_password}@{self.postgres_host}:{self.postgres_port}/{self.postgres_database_name}"
+
+
+settings = Settings()

@@ -11,6 +11,7 @@ from app.api.routers.events import router as events_router
 from app.api.routers.health import router as health_router
 from app.middlewares.redirect import enforce_slash_middleware
 from app.services.background_sync import sync_loop
+from app.workers.outbox_worker import OutboxWorker
 
 logging.basicConfig(
     level=logging.INFO,
@@ -25,14 +26,21 @@ async def lifespan(app: FastAPI):
     logger.info("app started")
 
     sync_task = asyncio.create_task(sync_loop())
+
+    outbox_worker = OutboxWorker()
+    outbox_task = asyncio.create_task(outbox_worker.run())
+
     try:
         yield
     finally:
         sync_task.cancel()
-        try:
-            await sync_task
-        except asyncio.CancelledError:
-            pass
+        outbox_task.cancel()
+
+        for task in (sync_task, outbox_task):
+            try:
+                await task
+            except asyncio.CancelledError:
+                pass
 
         logger.info("app stopped")
 
