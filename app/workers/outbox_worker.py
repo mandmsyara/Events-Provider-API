@@ -31,8 +31,10 @@ class OutboxWorker:
             events = await outbox_repo.get_pending(limit=settings.outbox_batch_size)
 
             for event in events:
-                await self.process_event(event, outbox_repo)
-
+                try:
+                    await self.process_event(event, outbox_repo)
+                except Exception:
+                    logger.exception("failed to process outbox event %s", event.id)
             await session.commit()
 
     async def process_event(self, event, outbox_repo: OutboxRepository):
