@@ -1,3 +1,5 @@
+import hashlib
+import json
 import uuid
 from uuid import UUID
 
@@ -6,10 +8,12 @@ from app.core.enums import EventStatus
 from app.exception.exceptions import (
     EventNotAvailableError,
     EventNotFoundError,
+    IdempotencyConflictError,
     SeatNotAvailableError,
     TicketNotFoundError,
 )
 from app.repositories.events import EventRepository
+from app.repositories.idempotency import IdempotencyRepository
 from app.repositories.outbox import OutboxRepository
 from app.repositories.tickets import TicketRepository
 
@@ -21,13 +25,41 @@ class TicketService:
         event_repo: EventRepository,
         ticket_repo: TicketRepository,
         outbox_repo: OutboxRepository,
+        idempotency_repo: IdempotencyRepository,
     ):
         self.client = client
         self.event_repo = event_repo
         self.ticket_repo = ticket_repo
         self.outbox_repo = outbox_repo
+        self.idempotency_repo = idempotency_repo
+
+    @staticmethod
+    def make_request_hash(data) -> str:
+        payload = {
+            "event_id": str(data.event_id),
+            "first_name": data.first_name,
+            "last_name": data.last_name,
+            "email": data.email,
+            "seat": data.seat,
+        }
+
+        raw = json.dumps(payload, sort_keys=True)
+
+        return hashlib.sha256(raw.encode()).hexdigest()
 
     async def create_ticket(self, data):
+        request_hash = None
+
+        if data.idempotency_key:
+            request_hash = self.make_request_hash(data)
+            saved = await self.idempotency_repo.get_by_key(data.idempotency_key)
+
+            if saved:
+                if saved.request_hash != request_hash:
+                    raise IdempotencyConflictError()
+
+                return saved.response_payload
+
         event = await self.event_repo.get_events_by_id(data.event_id)
 
         if not event:
@@ -73,9 +105,22 @@ class TicketService:
                 },
             }
         )
+
+        response_payload = {"ticket_id": str(ticket.id)}
+
+        if data.idempotency_key:
+            await self.idempotency_repo.create(
+                {
+                    "idempotency_key": data.idempotency_key,
+                    "request_hash": request_hash,
+                    "ticket_id": ticket.id,
+                    "response_payload": response_payload,
+                }
+            )
+
         await self.ticket_repo.session.commit()
 
-        return {"ticket_id": ticket.id}
+        return response_payload
 
     async def delete_ticket(self, ticket_id: UUID):
         ticket = await self.ticket_repo.get_by_id(ticket_id)

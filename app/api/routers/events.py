@@ -9,11 +9,13 @@ from app.database.session import get_async_session
 from app.exception.exceptions import (
     EventNotAvailableError,
     EventNotFoundError,
+    IdempotencyConflictError,
     ProviderRequestError,
     SeatNotAvailableError,
     TicketNotFoundError,
 )
 from app.repositories.events import EventRepository
+from app.repositories.idempotency import IdempotencyRepository
 from app.repositories.outbox import OutboxRepository
 from app.repositories.sync_state import SyncStateRepository
 from app.repositories.tickets import TicketRepository
@@ -93,9 +95,12 @@ async def create_ticket(
     event_repo = EventRepository(session)
     ticket_repo = TicketRepository(session)
     outbox_repo = OutboxRepository(session)
+    idempotency_repo = IdempotencyRepository(session)
     client = EventsProviderClient()
 
-    service = TicketService(client, event_repo, ticket_repo, outbox_repo)
+    service = TicketService(
+        client, event_repo, ticket_repo, outbox_repo, idempotency_repo
+    )
 
     try:
         return await service.create_ticket(payload)
@@ -111,6 +116,9 @@ async def create_ticket(
     except SeatNotAvailableError:
         raise HTTPException(status_code=400, detail="Seat not available")
 
+    except IdempotencyConflictError:
+        raise HTTPException(status_code=409, detail="Idempotency key conflict")
+
     except ProviderRequestError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -122,9 +130,13 @@ async def delete_ticket(
     event_repo = EventRepository(session)
     ticket_repo = TicketRepository(session)
     outbox_repo = OutboxRepository(session)
+    idempotency_repo = IdempotencyRepository(session)
+
     client = EventsProviderClient()
 
-    service = TicketService(client, event_repo, ticket_repo, outbox_repo)
+    service = TicketService(
+        client, event_repo, ticket_repo, outbox_repo, idempotency_repo
+    )
 
     try:
         return await service.delete_ticket(ticket_id)

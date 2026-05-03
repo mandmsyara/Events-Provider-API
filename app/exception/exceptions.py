@@ -16,3 +16,7 @@ class TicketNotFoundError(Exception):
 
 class ProviderRequestError(Exception):
     pass
+
+
+class IdempotencyConflictError(Exception):
+    pass

@@ -7,10 +7,11 @@ from alembic import context
 from app.database.base import Base
 
 # from app.models.event import Event
-# from app.models.outbox import Outbox
 # from app.models.place import Place
-# from app.models.sync_state import SyncState
 # from app.models.ticket import Ticket
+# from app.models.sync_state import SyncState
+# from app.models.outbox import Outbox
+# from app.models.idempotency import Idempotency
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
