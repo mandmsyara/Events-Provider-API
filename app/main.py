@@ -1,13 +1,13 @@
 import asyncio
 import logging
 from contextlib import asynccontextmanager
-import sentry_sdk
-from sentry_sdk.integrations.fastapi import FastApiIntegration
 
+import sentry_sdk
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from prometheus_fastapi_instrumentator import Instrumentator
+from sentry_sdk.integrations.fastapi import FastApiIntegration
 
 from app.api.routers.events import router as events_router
 from app.api.routers.health import router as health_router
