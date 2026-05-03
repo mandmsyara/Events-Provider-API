@@ -65,7 +65,7 @@ class TicketService:
                 "payload": {
                     "ticket_id": str(ticket.id),
                     "event_id": str(event.id),
-                    "event_title": event.title,
+                    "event_title": event.name,
                     "seat": ticket.seat,
                     "email": ticket.email,
                     "first_name": ticket.first_name,
