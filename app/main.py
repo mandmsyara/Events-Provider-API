@@ -1,6 +1,8 @@
 import asyncio
 import logging
 from contextlib import asynccontextmanager
+import sentry_sdk
+from sentry_sdk.integrations.fastapi import FastApiIntegration
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
@@ -9,6 +11,7 @@ from prometheus_fastapi_instrumentator import Instrumentator
 
 from app.api.routers.events import router as events_router
 from app.api.routers.health import router as health_router
+from app.core.config import settings
 from app.middlewares.redirect import enforce_slash_middleware
 from app.services.background_sync import sync_loop
 from app.workers.outbox_worker import OutboxWorker
@@ -19,6 +22,14 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger(__name__)
+
+if settings.sentry_dsn:
+    sentry_sdk.init(
+        dsn=settings.sentry_dsn,
+        integrations=[FastApiIntegration()],
+        environment=settings.environment,
+        traces_sample_rate=0.0,
+    )
 
 
 @asynccontextmanager

@@ -27,5 +27,8 @@ class Settings(BaseSettings):
     def database_url(self) -> str:
         return f"postgresql+asyncpg://{self.postgres_username}:{self.postgres_password}@{self.postgres_host}:{self.postgres_port}/{self.postgres_database_name}"
 
+    sentry_dsn: str | None = None
+    environment: str = "production"
+
 
 settings = Settings()
