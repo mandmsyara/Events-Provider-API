@@ -145,3 +145,8 @@ async def delete_ticket(
         raise HTTPException(status_code=404, detail="Ticket not found")
     except ProviderRequestError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.get("/debug-sentry/")
+async def debug_sentry():
+    raise RuntimeError("GlitchTip test error")
