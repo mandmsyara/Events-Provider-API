@@ -18,6 +18,20 @@ from app.repositories.outbox import OutboxRepository
 from app.repositories.tickets import TicketRepository
 
 
+def make_request_hash(data) -> str:
+    payload = {
+        "event_id": str(data.event_id),
+        "first_name": data.first_name,
+        "last_name": data.last_name,
+        "email": data.email,
+        "seat": data.seat,
+    }
+
+    raw = json.dumps(payload, sort_keys=True)
+
+    return hashlib.sha256(raw.encode()).hexdigest()
+
+
 class TicketService:
     def __init__(
         self,
@@ -33,25 +47,11 @@ class TicketService:
         self.outbox_repo = outbox_repo
         self.idempotency_repo = idempotency_repo
 
-    @staticmethod
-    def make_request_hash(data) -> str:
-        payload = {
-            "event_id": str(data.event_id),
-            "first_name": data.first_name,
-            "last_name": data.last_name,
-            "email": data.email,
-            "seat": data.seat,
-        }
-
-        raw = json.dumps(payload, sort_keys=True)
-
-        return hashlib.sha256(raw.encode()).hexdigest()
-
     async def create_ticket(self, data):
         request_hash = None
 
         if data.idempotency_key:
-            request_hash = self.make_request_hash(data)
+            request_hash = make_request_hash(data)
             saved = await self.idempotency_repo.get_by_key(data.idempotency_key)
 
             if saved:
